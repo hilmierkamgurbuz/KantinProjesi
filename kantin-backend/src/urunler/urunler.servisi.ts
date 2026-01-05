@@ -1,0 +1,54 @@
+
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Urun } from '../entities/urun.entity';
+import { UrunOlusturmaDto, UrunGuncellemeDto } from '../dtos/urun.dto';
+import { ObjectId } from 'mongodb';
+
+@Injectable()
+export class UrunServisi {
+    constructor(
+        @InjectRepository(Urun)
+        private readonly urunDeposu: Repository<Urun>,
+    ) { }
+
+    olustur(urunOlusturmaDto: UrunOlusturmaDto): Promise<Urun> {
+        const urun = this.urunDeposu.create(urunOlusturmaDto);
+        return this.urunDeposu.save(urun);
+    }
+
+    tumunuGetir(): Promise<Urun[]> {
+        // İlişkileri manuel çözmek gerekebilir ama şimdilik sadece ürünleri dönelim
+        return this.urunDeposu.find();
+    }
+
+    async bul(id: string): Promise<Urun> {
+        const urun = await this.urunDeposu.findOne({
+            where: { id: new ObjectId(id) as any },
+        });
+        if (!urun) {
+            throw new NotFoundException('Ürün bulunamadı');
+        }
+        return urun;
+    }
+
+    async kategorisineGoreBul(kategoriId: string): Promise<Urun[]> {
+        return this.urunDeposu.find({
+            where: { kategoriId },
+        });
+    }
+
+    async guncelle(id: string, urunGuncellemeDto: UrunGuncellemeDto): Promise<Urun> {
+        await this.urunDeposu.update(new ObjectId(id), urunGuncellemeDto);
+        return this.bul(id);
+    }
+
+    async sil(id: string): Promise<void> {
+        const sonuc = await this.urunDeposu.delete(new ObjectId(id));
+        if (sonuc.affected === 0) {
+            throw new NotFoundException('Ürün bulunamadı');
+        }
+    }
+}
+
