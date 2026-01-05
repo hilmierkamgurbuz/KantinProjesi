@@ -7,7 +7,7 @@ async function baslat() {
 
   // CORS aktif et
   uygulama.enableCors({
-    origin: 'https://kantin-projesi-cqiprmrn1-hilmis-projects-4c9cd220.vercel.app',
+    origin: 'https://kantin-projesi.vercel.app',
     credentials: true
   });
 
