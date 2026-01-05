@@ -6,7 +6,7 @@ export const yetkilendirmeServisi = {
         // Backend { user, token } dönüyor, biz { kullanici, token } olarak mapeleyeceğiz
         const yanit = await api.post<any>('/yetkilendirme/giris', girisYapmaDto);
         if (yanit.data.token) {
-            console.log('Jeton alındı ve kaydedildi:', yanit.data.token);
+
             localStorage.setItem('token', yanit.data.token);
             // Backend 'user' objesi dönüyor, bunu 'kullanici' olarak saklayalım veya olduğu gibi saklayalım.
             // Frontend genelinde 'user' key'i localStorage'da kullanılıyordu. 'kullanici' yapalım.

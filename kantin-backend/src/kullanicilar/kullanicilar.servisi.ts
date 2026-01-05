@@ -19,19 +19,19 @@ export class KullaniciServisi implements OnModuleInit {
     }
 
     async pesinMusteriKontrolu() {
-        
+
         let pesinMusteri = await this.kullaniciDeposu.findOne({ where: { rol: KullaniciRolu.PESIN_MUSTERI } });
 
         if (pesinMusteri) {
-            
+
             if (pesinMusteri.soyad !== 'Satış') {
                 pesinMusteri.ad = 'Peşin';
                 pesinMusteri.soyad = 'Satış';
                 await this.kullaniciDeposu.save(pesinMusteri);
-                console.log('Peşin Müşteri ismi güncellendi -> Peşin Satış');
+
             }
         } else {
-            console.log('Peşin Satış kullanıcısı bulunamadı, oluşturuluyor...');
+
             const sifrelenmisSifre = await bcrypt.hash('123456', 10);
             const kullanici = this.kullaniciDeposu.create({
                 ad: 'Peşin',
@@ -43,7 +43,7 @@ export class KullaniciServisi implements OnModuleInit {
                 aktifMi: true
             });
             await this.kullaniciDeposu.save(kullanici);
-            console.log('Peşin Satış kullanıcısı oluşturuldu.');
+
         }
     }
 
@@ -52,7 +52,7 @@ export class KullaniciServisi implements OnModuleInit {
         const adminMevcut = await this.telefonIleBul(telefon);
 
         if (!adminMevcut) {
-            console.log('Admin hesabı bulunamadı, oluşturuluyor...');
+
             const sifrelenmisSifre = await bcrypt.hash('123456', 10);
             const admin = this.kullaniciDeposu.create({
                 ad: 'Yönetici',
@@ -64,13 +64,13 @@ export class KullaniciServisi implements OnModuleInit {
                 aktifMi: true
             });
             await this.kullaniciDeposu.save(admin);
-            console.log('Admin hesabı (05519882266) başarıyla oluşturuldu.');
+
         } else {
-           
+
             if (adminMevcut.rol !== KullaniciRolu.YONETICI) {
                 adminMevcut.rol = KullaniciRolu.YONETICI;
                 await this.kullaniciDeposu.save(adminMevcut);
-                console.log('Kullanıcı role YONETICI olarak güncellendi.');
+
             }
         }
     }
@@ -110,7 +110,7 @@ export class KullaniciServisi implements OnModuleInit {
     }
 
     async guncelle(id: string, kullaniciGuncellemeDto: KullaniciGuncellemeDto): Promise<Kullanici> {
-        
+
 
         const veri: any = { ...kullaniciGuncellemeDto };
         if (veri.sifre) {

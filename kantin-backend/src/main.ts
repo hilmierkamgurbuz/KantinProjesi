@@ -8,7 +8,7 @@ async function baslat() {
   // CORS aktif et
   const onYuzUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   uygulama.enableCors({
-    origin: [onYuzUrl, 'http://localhost:5173', 'http://localhost:3000'],
+    origin: [onYuzUrl, 'http://localhost:5173', 'http://localhost:3000', 'https://kantin-projesi-cqiprmrn1-hilmis-projects-4c9cd220.vercel.app'],
     credentials: true,
   });
 
