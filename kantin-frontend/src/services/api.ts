@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://yelping-rosalie-kantin-projesi-3b8c857d.koyeb.app';
+const API_URL = 'https://yelping-rosalie-kantin-projesi-3b8c857d.koyeb.app'; // trigger Vercel rebuild
 
 export const api = axios.create({
   baseURL: API_URL,
