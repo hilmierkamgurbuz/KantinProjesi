@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://yelping-rosalie-kantin-projesi-3b8c857d.koyeb.app'; // trigger Vercel rebuild
+const API_URL = 'https://yelping-rosalie-kantin-projesi-3b8c857d.koyeb.app';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -30,7 +30,7 @@ api.interceptors.response.use(
     if (hata.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('kullanici');
-      window.location.href = '/login'; // Bunu da /giris yapacağız ileride
+      window.location.href = '/giris'; // Bunu da /giris yapacağız ileride -> Yapıldı
     }
     return Promise.reject(hata);
   }
