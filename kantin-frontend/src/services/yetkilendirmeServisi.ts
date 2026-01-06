@@ -4,7 +4,7 @@ import { GirisYapmaDto, KayitOlusturmaDto, GirisYaniti, Kullanici } from '../typ
 export const yetkilendirmeServisi = {
     async girisYap(girisYapmaDto: GirisYapmaDto): Promise<GirisYaniti> {
         // Backend { user, token } dönüyor, biz { kullanici, token } olarak mapeleyeceğiz
-        const yanit = await api.post<any>('/yetkilendirme/giris', girisYapmaDto);
+        const yanit = await api.post<any>('https://yelping-rosalie-kantin-projesi-3b8c857d.koyeb.app/yetkilendirme/giris', girisYapmaDto);
         if (yanit.data.token) {
 
             localStorage.setItem('token', yanit.data.token);
