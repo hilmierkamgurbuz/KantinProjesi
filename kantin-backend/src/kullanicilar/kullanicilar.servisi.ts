@@ -89,8 +89,10 @@ export class KullaniciServisi implements OnModuleInit {
 
     async bul(id: string): Promise<Kullanici> {
         try {
+            // MongoDB'de _id ile arama yapmak için explicit olarak belirtiyoruz
+            // TypeORM Mongo driver bazen id -> _id mapping'ini karıştırabiliyor
             const kullanici = await this.kullaniciDeposu.findOne({
-                where: { id: new ObjectId(id) as any }, // Type assertion might be needed if TypeORM types are strict about string vs ObjectId
+                where: { _id: new ObjectId(id) } as any,
             });
             if (!kullanici) {
                 throw new NotFoundException('Kullanıcı bulunamadı');
