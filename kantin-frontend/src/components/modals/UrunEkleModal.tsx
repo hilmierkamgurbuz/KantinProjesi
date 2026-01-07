@@ -57,7 +57,15 @@ const UrunEkleModal: React.FC<UrunEkleModalOzellikleri> = ({ acik, kapat, basari
             basariliOldugunda();
             kapat();
         } catch (err: any) {
-            setHata(err.response?.data?.message || 'Ürün eklenirken bir hata oluştu');
+
+            const mesaj = err.response?.data?.message;
+            if (Array.isArray(mesaj)) {
+                setHata(mesaj.join(', '));
+            } else if (typeof mesaj === 'object' && mesaj !== null) {
+                setHata(JSON.stringify(mesaj));
+            } else {
+                setHata(mesaj || 'Ürün eklenirken bir hata oluştu');
+            }
         } finally {
             setYukleniyor(false);
         }
