@@ -65,7 +65,7 @@ export class SiparisServisi {
             await this.kullaniciServisi.bakiyeGuncelle(siparisOlusturmaDto.kullaniciId, -toplamTutar);
         }
 
-        return this.bul((kaydedilenSiparis as any).id);
+        return this.bul((kaydedilenSiparis as any)._id?.toString() || (kaydedilenSiparis as any).id);
     }
 
     async tumunuGetir(): Promise<Siparis[]> {
@@ -76,6 +76,10 @@ export class SiparisServisi {
     }
 
     async bul(id: string): Promise<Siparis> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Sipariş ID: ${id}`);
+        }
+
         const siparis = await this.siparisDeposu.findOne({
             where: { _id: new ObjectId(id) } as any,
         });
@@ -186,6 +190,7 @@ export class SiparisServisi {
             // Siparis.kullaniciId string.
             // KullaniciMap key: string.
             // Eğer servis ObjectId dönüyorsa toString() gerekir.
+            if ((siparis as any)._id) siparis.id = (siparis as any)._id;
 
             // Kullanıcı eşleştirme
             const kullaniciObj = kullaniciMap.get(siparis.kullaniciId);

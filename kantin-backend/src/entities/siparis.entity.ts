@@ -18,6 +18,9 @@ export class Siparis {
     @ObjectIdColumn()
     id: ObjectId;
 
+    @ObjectIdColumn({ name: '_id', select: false })
+    _id: ObjectId;
+
     @Column()
     kullaniciId: string;
 

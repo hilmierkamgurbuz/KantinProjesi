@@ -30,6 +30,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         this.logger.error(
             `Http Status: ${status} Error Message: ${JSON.stringify(message)} Path: ${request.url}`,
         );
+        console.error(exception);
 
         response.status(status).json({
             statusCode: status,
