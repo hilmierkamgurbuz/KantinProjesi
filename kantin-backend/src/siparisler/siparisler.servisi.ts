@@ -19,6 +19,22 @@ export class SiparisServisi {
     ) { }
 
     async olustur(siparisOlusturmaDto: SiparisOlusturmaDto): Promise<Siparis> {
+        // Kullanıcı kontrolü
+        const kullanici = await this.kullaniciServisi.bul(siparisOlusturmaDto.kullaniciId);
+        if (!kullanici) {
+            throw new NotFoundException(`Kullanıcı bulunamadı (ID: ${siparisOlusturmaDto.kullaniciId})`);
+        }
+
+        // Ürün kontrolü
+        for (const oge of siparisOlusturmaDto.ogeler) {
+            try {
+                const urun = await this.urunServisi.bul(oge.urunId);
+                if (!urun) throw new Error();
+            } catch (e) {
+                throw new NotFoundException(`Ürün bulunamadı (ID: ${oge.urunId})`);
+            }
+        }
+
         const toplamTutar = siparisOlusturmaDto.ogeler.reduce(
             (toplam, oge) => toplam + oge.miktar * oge.birimFiyat,
             0,
@@ -46,7 +62,7 @@ export class SiparisServisi {
         const kaydedilenSiparis = await this.siparisDeposu.save(siparis);
 
         if (siparisOlusturmaDto.tur === SiparisTuru.VERESIYE || !siparisOlusturmaDto.tur) {
-            await this.kullaniciServisi.bakiyeGuncelle(siparisOlusturmaDto.kullaniciId, toplamTutar);
+            await this.kullaniciServisi.bakiyeGuncelle(siparisOlusturmaDto.kullaniciId, -toplamTutar);
         }
 
         return this.bul((kaydedilenSiparis as any).id);
@@ -61,7 +77,7 @@ export class SiparisServisi {
 
     async bul(id: string): Promise<Siparis> {
         const siparis = await this.siparisDeposu.findOne({
-            where: { id: new ObjectId(id) as any },
+            where: { _id: new ObjectId(id) } as any,
         });
 
         if (!siparis) {
