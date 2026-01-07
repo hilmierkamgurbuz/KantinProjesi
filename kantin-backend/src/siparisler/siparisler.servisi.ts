@@ -176,7 +176,7 @@ export class SiparisServisi {
         const kullaniciMap = new Map(kullanicilar.filter(k => k).map(k => [k!.id.toString(), k]));
 
         // Ürünleri yükle
-        const urunIds = [...new Set(siparisler.flatMap(s => s.ogeler.map(o => o.urunId)))];
+        const urunIds = [...new Set(siparisler.flatMap(s => (Array.isArray(s.ogeler) ? s.ogeler.map(o => o.urunId) : [])))];
         const urunler = await Promise.all(
             urunIds.map(id => this.urunServisi.bul(id).catch(() => null))
         );
@@ -197,12 +197,14 @@ export class SiparisServisi {
             if (kullaniciObj) siparis.kullanici = kullaniciObj;
 
             // Öğeleri eşleştirme
-            if (siparis.ogeler) {
+            if (Array.isArray(siparis.ogeler)) {
                 siparis.ogeler = siparis.ogeler.map(oge => {
                     const urunObj = urunMap.get(oge.urunId);
                     if (urunObj) oge.urun = urunObj;
                     return oge;
                 });
+            } else {
+                siparis.ogeler = [];
             }
             return siparis;
         });
