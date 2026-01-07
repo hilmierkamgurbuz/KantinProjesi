@@ -64,7 +64,8 @@ export class YetkilendirmeServisi {
     }
 
     private jetonUret(kullanici: any) {
-        const payload = { sub: kullanici.id, phone: kullanici.telefon, role: kullanici.rol };
+        const userId = kullanici.id || (kullanici._id ? kullanici._id.toString() : null);
+        const payload = { sub: userId, phone: kullanici.telefon, role: kullanici.rol };
         return this.jwtServisi.sign(payload);
     }
 }

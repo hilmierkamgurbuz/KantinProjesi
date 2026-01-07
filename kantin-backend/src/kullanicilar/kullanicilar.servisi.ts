@@ -112,10 +112,17 @@ export class KullaniciServisi implements OnModuleInit {
     }
 
     async telefonIleBul(telefon: string): Promise<Kullanici | null> {
-        return this.kullaniciDeposu.findOne({
+        const kullanici = await this.kullaniciDeposu.findOne({
             where: { telefon },
-            select: ['id', 'ad', 'soyad', 'telefon', 'rol', 'bakiye', 'aktifMi', 'sifre', 'olusturulmaTarihi'] as any
+            // _id'yi de seciyoruz
+            select: ['id', '_id', 'ad', 'soyad', 'telefon', 'rol', 'bakiye', 'aktifMi', 'sifre', 'olusturulmaTarihi'] as any
         });
+
+        if (kullanici && kullanici._id) {
+            kullanici.id = kullanici._id.toString();
+        }
+
+        return kullanici;
     }
 
     async guncelle(id: string, kullaniciGuncellemeDto: KullaniciGuncellemeDto): Promise<Kullanici> {
