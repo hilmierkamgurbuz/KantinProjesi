@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsUUID, IsNumber, IsOptional, Min } from 'class-validator';
 
 export class OdemeOlusturmaDto {
-    @IsUUID()
+    @IsString()
     @IsNotEmpty()
     kullaniciId: string;
 
