@@ -5,7 +5,7 @@ export class UrunOlusturmaDto {
     @IsNotEmpty()
     ad: string;
 
-    @IsUUID()
+    @IsString()
     @IsNotEmpty()
     kategoriId: string;
 
@@ -27,7 +27,7 @@ export class UrunGuncellemeDto {
     @IsOptional()
     ad?: string;
 
-    @IsUUID()
+    @IsString()
     @IsOptional()
     kategoriId?: string;
 
