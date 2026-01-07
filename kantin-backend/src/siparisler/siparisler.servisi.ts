@@ -31,11 +31,7 @@ export class SiparisServisi {
             0,
         );
 
-        // Borç kontrolü: Mevcut Borç + Yeni Tutar > 10 ise Reddet
-        if ((siparisOlusturmaDto.tur === SiparisTuru.VERESIYE || !siparisOlusturmaDto.tur) &&
-            (kullanici.bakiye + toplamTutar > 10)) {
-            throw new NotFoundException(`Yetersiz Bakiye. Maksimum borç limiti (10 TL) aşıldı. Mevcut Borç: ${kullanici.bakiye}, İşlem Tutarı: ${toplamTutar}`);
-        }
+
 
         // Ürün kontrolü ve Hazırlık
         const gelenOgeler = Array.isArray(siparisOlusturmaDto.ogeler) ? siparisOlusturmaDto.ogeler : [];

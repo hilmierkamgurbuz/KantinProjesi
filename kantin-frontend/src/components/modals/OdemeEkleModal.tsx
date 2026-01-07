@@ -33,7 +33,9 @@ const OdemeEkleModal: React.FC<OdemeEkleModalOzellikleri> = ({ acik, kapat, basa
             basariliOldugunda();
             kapat();
         } catch (err: any) {
-            setHata(err.response?.data?.message || 'Ödeme eklenirken bir hata oluştu');
+            console.error('Ödeme ekleme hatası:', err);
+            const mesaj = err.response?.data?.message;
+            setHata(typeof mesaj === 'string' ? mesaj : JSON.stringify(mesaj) || 'Ödeme eklenirken bir hata oluştu');
         } finally {
             setYukleniyor(false);
         }

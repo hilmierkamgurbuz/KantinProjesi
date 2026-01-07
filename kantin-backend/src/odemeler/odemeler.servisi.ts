@@ -22,12 +22,13 @@ export class OdemeServisi {
 
         const kaydedilenOdeme = await this.odemeDeposu.save(odeme);
 
-        // Bakiyeyi güncelle
+        // Bakiyeyi güncelle (Ödeme = Borç Azalır)
+        // Debt Model: Payment subtracts from positive debt balance.
         if (Number(odemeOlusturmaDto.tutar) > 0) {
             await this.kullaniciServisi.bakiyeGuncelle(odemeOlusturmaDto.kullaniciId, -Number(odemeOlusturmaDto.tutar));
         }
 
-        return kaydedilenOdeme as unknown as Odeme;
+        return this.bul((kaydedilenOdeme as any)._id?.toString() || (kaydedilenOdeme as any).id);
     }
 
     tumunuGetir(): Promise<Odeme[]> {
@@ -44,16 +45,23 @@ export class OdemeServisi {
     }
 
     async bul(id: string): Promise<Odeme> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Ödeme ID: ${id}`);
+        }
         const odeme = await this.odemeDeposu.findOne({
-            where: { id: new ObjectId(id) as any },
+            where: { _id: new ObjectId(id) } as any,
         });
         if (!odeme) {
             throw new NotFoundException('Ödeme bulunamadı');
         }
+        if (odeme._id) odeme.id = odeme._id;
         return odeme;
     }
 
     async sil(id: string): Promise<void> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Ödeme ID: ${id}`);
+        }
         const odeme = await this.bul(id);
 
         // Silinince bakiyeyi iade et (borç artar)
