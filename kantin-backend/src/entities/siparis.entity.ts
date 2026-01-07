@@ -41,7 +41,7 @@ export class Siparis {
     notlar: string;
 
     @Column((type) => SiparisOgesi)
-    ogeler: SiparisOgesi[];
+    ogeler: SiparisOgesi[] = [];
 
     @CreateDateColumn()
     olusturulmaTarihi: Date;

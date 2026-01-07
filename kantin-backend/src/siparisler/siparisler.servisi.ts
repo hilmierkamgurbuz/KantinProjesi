@@ -25,8 +25,20 @@ export class SiparisServisi {
             throw new NotFoundException(`Kullanıcı bulunamadı (ID: ${siparisOlusturmaDto.kullaniciId})`);
         }
 
+        // Bakiye Kontrolü (Veresiye için -10 limit)
+        const toplamTutar = siparisOlusturmaDto.ogeler.reduce(
+            (toplam, oge) => toplam + oge.miktar * oge.birimFiyat,
+            0,
+        );
+
+        if ((siparisOlusturmaDto.tur === SiparisTuru.VERESIYE || !siparisOlusturmaDto.tur) &&
+            (kullanici.bakiye - toplamTutar < -10)) {
+            throw new NotFoundException(`Yetersiz Bakiye. İşlem sonrası bakiye -10 TL'nin altına düşemez. Mevcut: ${kullanici.bakiye}, Tutar: ${toplamTutar}`);
+        }
+
         // Ürün kontrolü
-        for (const oge of siparisOlusturmaDto.ogeler) {
+        const gelenOgeler = Array.isArray(siparisOlusturmaDto.ogeler) ? siparisOlusturmaDto.ogeler : [];
+        for (const oge of gelenOgeler) {
             try {
                 const urun = await this.urunServisi.bul(oge.urunId);
                 if (!urun) throw new Error();
@@ -35,13 +47,8 @@ export class SiparisServisi {
             }
         }
 
-        const toplamTutar = siparisOlusturmaDto.ogeler.reduce(
-            (toplam, oge) => toplam + oge.miktar * oge.birimFiyat,
-            0,
-        );
-
         // Sipariş öğelerini hazırla
-        const ogeler: SiparisOgesi[] = siparisOlusturmaDto.ogeler.map(oge => {
+        const ogeler: SiparisOgesi[] = gelenOgeler.map(oge => {
             const yeniOge = new SiparisOgesi();
             yeniOge.id = uuidv4();
             yeniOge.urunId = oge.urunId;
