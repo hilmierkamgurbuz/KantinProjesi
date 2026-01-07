@@ -124,9 +124,16 @@ const Panel: React.FC = () => {
             setSepet([]);
             verileriGetir();
             alert('Sipariş başarıyla oluşturuldu!');
-        } catch (hata) {
+        } catch (hata: any) {
             console.error('Sipariş hatası:', hata);
-            alert('Sipariş oluşturulurken hata oluştu.');
+            const mesaj = hata.response?.data?.message;
+            if (Array.isArray(mesaj)) {
+                alert(`Sipariş oluşturulamadı: ${mesaj.join(', ')}`);
+            } else if (typeof mesaj === 'object' && mesaj !== null) {
+                alert(`Sipariş oluşturulamadı: ${JSON.stringify(mesaj)}`);
+            } else {
+                alert(`Sipariş oluşturulamadı: ${mesaj || 'Bilinmeyen bir hata oluştu.'}`);
+            }
         } finally {
             setSiparisYukleniyor(false);
         }

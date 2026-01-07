@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { SiparisTuru } from '../entities/siparis.entity';
 
 export class SiparisOgesiDto {
-    @IsUUID()
+    @IsString()
     @IsNotEmpty()
     urunId: string;
 
@@ -17,7 +17,7 @@ export class SiparisOgesiDto {
 }
 
 export class SiparisOlusturmaDto {
-    @IsUUID()
+    @IsString()
     @IsNotEmpty()
     kullaniciId: string;
 
