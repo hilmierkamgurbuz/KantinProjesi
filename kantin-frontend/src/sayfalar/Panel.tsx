@@ -42,7 +42,9 @@ const Panel: React.FC = () => {
                 api.get<Kategori[]>('/kategoriler'),
                 api.get<Urun[]>('/urunler'),
             ]);
-            setKullanicilar(kullanicilarYanit.data.filter(u => u.rol !== KullaniciRolu.YONETICI));
+            setKullanicilar(kullanicilarYanit.data
+                .map(u => ({ ...u, id: (u.id || u._id) as string })) // ID normalizasyonu
+                .filter(u => u.rol !== KullaniciRolu.YONETICI));
             setKategoriler(kategorilerYanit.data);
             setUrunler(urunlerYanit.data);
         } catch (hata) {
@@ -108,7 +110,7 @@ const Panel: React.FC = () => {
         setSiparisYukleniyor(true);
         try {
             const siparisVerisi = {
-                kullaniciId: secilenKullanici.id || secilenKullanici._id!,
+                kullaniciId: secilenKullanici.id,
                 tur: secilenKullanici.rol === KullaniciRolu.PESIN_MUSTERI ? 'cash' : 'credit',
                 ogeler: sepet.map(({ urunId, miktar, birimFiyat }) => ({
                     urunId,
@@ -219,9 +221,9 @@ const Panel: React.FC = () => {
                     <div className="flex-1 overflow-y-auto p-2 space-y-2">
                         {filtrelenmisKullanicilar.map((u) => (
                             <button
-                                key={u.id || u._id}
+                                key={u.id}
                                 onClick={() => setSecilenKullanici(u)}
-                                className={`w-full text-left p-3 rounded-lg transition border ${(secilenKullanici?.id || secilenKullanici?._id) === (u.id || u._id)
+                                className={`w-full text-left p-3 rounded-lg transition border ${secilenKullanici?.id === u.id
                                     ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
                                     : (u.rol === KullaniciRolu.PESIN_MUSTERI ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200')
                                     }`}
@@ -230,7 +232,7 @@ const Panel: React.FC = () => {
                                     {u.ad} {u.soyad}
                                     {u.rol === KullaniciRolu.PESIN_MUSTERI && <span className="text-xs bg-green-200 text-green-800 px-1 rounded">PEŞİN</span>}
                                 </div>
-                                <div className={`text-sm ${(secilenKullanici?.id || secilenKullanici?._id) === (u.id || u._id) ? 'text-blue-100' : 'text-gray-500'}`}>
+                                <div className={`text-sm ${secilenKullanici?.id === u.id ? 'text-blue-100' : 'text-gray-500'}`}>
                                     {u.rol !== KullaniciRolu.PESIN_MUSTERI && (
                                         <>Hesap: <span className={u.bakiye < 0 ? 'text-red-500 font-bold' : ''}>₺{Number(u.bakiye).toFixed(2)}</span></>
                                     )}

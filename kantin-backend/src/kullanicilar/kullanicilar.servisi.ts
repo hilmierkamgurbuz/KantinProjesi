@@ -80,10 +80,18 @@ export class KullaniciServisi implements OnModuleInit {
         return this.kullaniciDeposu.save(kullanici) as any;
     }
 
-    tumunuGetir(): Promise<Kullanici[]> {
-        return this.kullaniciDeposu.find({
+    async tumunuGetir(): Promise<Kullanici[]> {
+        const kullanicilar = await this.kullaniciDeposu.find({
             where: { rol: Not(KullaniciRolu.YONETICI) },
             order: { olusturulmaTarihi: 'DESC' },
+        });
+
+        return kullanicilar.map(k => {
+            // _id varsa string'e çevirip id'ye ata
+            if (k._id) {
+                k.id = k._id.toString();
+            }
+            return k;
         });
     }
 
