@@ -27,7 +27,7 @@ export class SiparisServisi {
 
         // Bakiye Kontrolü (Veresiye için -10 limit)
         const toplamTutar = siparisOlusturmaDto.ogeler.reduce(
-            (toplam, oge) => toplam + oge.miktar * oge.birimFiyat,
+            (toplam, oge) => toplam + Number(oge.miktar) * Number(oge.birimFiyat),
             0,
         );
 
@@ -36,27 +36,28 @@ export class SiparisServisi {
             throw new NotFoundException(`Yetersiz Bakiye. İşlem sonrası bakiye -10 TL'nin altına düşemez. Mevcut: ${kullanici.bakiye}, Tutar: ${toplamTutar}`);
         }
 
-        // Ürün kontrolü
+        // Ürün kontrolü ve Hazırlık
         const gelenOgeler = Array.isArray(siparisOlusturmaDto.ogeler) ? siparisOlusturmaDto.ogeler : [];
+        const ogeler: SiparisOgesi[] = [];
+
         for (const oge of gelenOgeler) {
             try {
+                // Ürünü bul ve kontrol et
                 const urun = await this.urunServisi.bul(oge.urunId);
                 if (!urun) throw new Error();
+
+                const yeniOge = new SiparisOgesi();
+                yeniOge.id = uuidv4();
+                yeniOge.urunId = oge.urunId;
+                yeniOge.miktar = Number(oge.miktar);
+                yeniOge.birimFiyat = Number(oge.birimFiyat);
+                yeniOge.toplamFiyat = yeniOge.miktar * yeniOge.birimFiyat;
+                ogeler.push(yeniOge);
+
             } catch (e) {
                 throw new NotFoundException(`Ürün bulunamadı (ID: ${oge.urunId})`);
             }
         }
-
-        // Sipariş öğelerini hazırla
-        const ogeler: SiparisOgesi[] = gelenOgeler.map(oge => {
-            const yeniOge = new SiparisOgesi();
-            yeniOge.id = uuidv4();
-            yeniOge.urunId = oge.urunId;
-            yeniOge.miktar = oge.miktar;
-            yeniOge.birimFiyat = oge.birimFiyat;
-            yeniOge.toplamFiyat = oge.miktar * oge.birimFiyat;
-            return yeniOge;
-        });
 
         const siparis = this.siparisDeposu.create({
             kullaniciId: siparisOlusturmaDto.kullaniciId,
@@ -108,28 +109,14 @@ export class SiparisServisi {
     }
 
     async tarihAraliginaGoreBul(baslangicTarihi: Date, bitisTarihi: Date): Promise<Siparis[]> {
-        // Mongo'da tarih sorgusu için manual filtreleme veya $gte kullanımı
-        // TypeORM'un Mongo desteği sınırlı olabilir, en garantisi tümünü çekip filtrelemek (verisetini küçük varsayıyoruz)
-        // Veya :
-        /*
-        return this.siparisDeposu.find({
-            where: {
-                olusturulmaTarihi: {
-                    $gte: baslangicTarihi,
-                    $lte: bitisTarihi
-                } as any
-            }
-        });
-        */
-        // Basit tarih filtresi
         const siparisler = await this.siparisDeposu.find({
             order: { olusturulmaTarihi: 'DESC' }
         });
 
-        const filtrelenmis = siparisler.filter(s =>
-            s.olusturulmaTarihi >= baslangicTarihi &&
-            s.olusturulmaTarihi <= bitisTarihi
-        );
+        const filtrelenmis = siparisler.filter(s => {
+            const tarih = new Date(s.olusturulmaTarihi);
+            return tarih >= baslangicTarihi && tarih <= bitisTarihi;
+        });
 
         return this.siparisleriDoldur(filtrelenmis);
     }
@@ -176,7 +163,7 @@ export class SiparisServisi {
         if (!siparisler.length) return [];
 
         // Kullanıcıları yükle
-        const kullaniciIds = [...new Set(siparisler.map(s => s.kullaniciId))];
+        const kullaniciIds = [...new Set(siparisler.map(s => s.kullaniciId).filter(id => id))];
         const kullanicilar = await Promise.all(
             kullaniciIds.map(id => this.kullaniciServisi.bul(id).catch(() => null))
         );
@@ -191,23 +178,22 @@ export class SiparisServisi {
 
         // Nesnelere ata
         return siparisler.map(siparis => {
-            // Kullanıcıyı ata
-            // Not: MongoDB'den gelen id object olabilir, toString() ile karşılaştıralım
-            // Kullanici entity'sinde id ObjectId. Servis string dönüyor olabilir veya objectId.
-            // Siparis.kullaniciId string.
-            // KullaniciMap key: string.
-            // Eğer servis ObjectId dönüyorsa toString() gerekir.
+            // ID Mapping
             if ((siparis as any)._id) siparis.id = (siparis as any)._id;
 
             // Kullanıcı eşleştirme
-            const kullaniciObj = kullaniciMap.get(siparis.kullaniciId);
-            if (kullaniciObj) siparis.kullanici = kullaniciObj;
+            if (siparis.kullaniciId) {
+                const kullaniciObj = kullaniciMap.get(siparis.kullaniciId.toString());
+                if (kullaniciObj) siparis.kullanici = kullaniciObj;
+            }
 
             // Öğeleri eşleştirme
             if (Array.isArray(siparis.ogeler)) {
                 siparis.ogeler = siparis.ogeler.map(oge => {
-                    const urunObj = urunMap.get(oge.urunId);
-                    if (urunObj) oge.urun = urunObj;
+                    if (oge && oge.urunId) {
+                        const urunObj = urunMap.get(oge.urunId.toString());
+                        if (urunObj) oge.urun = urunObj;
+                    }
                     return oge;
                 });
             } else {

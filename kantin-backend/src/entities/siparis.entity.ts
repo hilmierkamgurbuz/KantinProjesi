@@ -40,7 +40,7 @@ export class Siparis {
     @Column({ type: 'text', nullable: true })
     notlar: string;
 
-    @Column((type) => SiparisOgesi)
+    @Column()
     ogeler: SiparisOgesi[] = [];
 
     @CreateDateColumn()

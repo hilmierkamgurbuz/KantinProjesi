@@ -36,7 +36,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
             statusCode: status,
             timestamp: new Date().toISOString(),
             path: request.url,
-            message: message,
+            message: message || 'Internal Server Error',
+            stack: process.env.NODE_ENV === 'development' ? (exception as any).stack : undefined
         });
     }
 }
