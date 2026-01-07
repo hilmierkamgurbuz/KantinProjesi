@@ -25,6 +25,7 @@ export class KullaniciKontrolcusu {
 
     @Get()
     tumunuGetir() {
+        console.log('GET /kullanicilar endpoint hit');
         return this.kullaniciServisi.tumunuGetir();
     }
 

@@ -82,7 +82,6 @@ export class KullaniciServisi implements OnModuleInit {
 
     async tumunuGetir(): Promise<Kullanici[]> {
         const kullanicilar = await this.kullaniciDeposu.find({
-            where: { rol: Not(KullaniciRolu.YONETICI) },
             order: { olusturulmaTarihi: 'DESC' },
         });
 
