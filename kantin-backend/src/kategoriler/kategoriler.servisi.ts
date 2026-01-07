@@ -12,9 +12,10 @@ export class KategoriServisi {
         private readonly kategoriDeposu: Repository<Kategori>,
     ) { }
 
-    olustur(kategoriOlusturmaDto: KategoriOlusturmaDto): Promise<Kategori> {
+    async olustur(kategoriOlusturmaDto: KategoriOlusturmaDto): Promise<Kategori> {
         const kategori = this.kategoriDeposu.create(kategoriOlusturmaDto);
-        return this.kategoriDeposu.save(kategori);
+        const kaydedilenKategori = await this.kategoriDeposu.save(kategori);
+        return this.bul((kaydedilenKategori as any)._id?.toString() || (kaydedilenKategori as any).id);
     }
 
     async tumunuGetir(): Promise<Kategori[]> {
@@ -26,6 +27,9 @@ export class KategoriServisi {
     }
 
     async bul(id: string): Promise<Kategori> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Kategori ID: ${id}`);
+        }
         const kategori = await this.kategoriDeposu.findOne({ where: { _id: new ObjectId(id) } as any });
         if (!kategori) {
             throw new NotFoundException('Kategori bulunamadı');
@@ -35,11 +39,17 @@ export class KategoriServisi {
     }
 
     async guncelle(id: string, kategoriGuncellemeDto: KategoriGuncellemeDto): Promise<Kategori> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Kategori ID: ${id}`);
+        }
         await this.kategoriDeposu.update(new ObjectId(id), kategoriGuncellemeDto);
         return this.bul(id);
     }
 
     async sil(id: string): Promise<void> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Kategori ID: ${id}`);
+        }
         const sonuc = await this.kategoriDeposu.delete(new ObjectId(id));
         if (sonuc.affected === 0) {
             throw new NotFoundException('Kategori bulunamadı');

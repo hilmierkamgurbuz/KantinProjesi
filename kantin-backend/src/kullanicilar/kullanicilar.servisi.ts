@@ -75,9 +75,10 @@ export class KullaniciServisi implements OnModuleInit {
         }
     }
 
-    olustur(kullaniciOlusturmaDto: any): Promise<Kullanici> {
+    async olustur(kullaniciOlusturmaDto: any): Promise<Kullanici> {
         const kullanici = this.kullaniciDeposu.create(kullaniciOlusturmaDto);
-        return this.kullaniciDeposu.save(kullanici) as any;
+        const kaydedilenKullanici = await this.kullaniciDeposu.save(kullanici);
+        return this.bul((kaydedilenKullanici as any)._id?.toString() || (kaydedilenKullanici as any).id);
     }
 
     async tumunuGetir(): Promise<Kullanici[]> {
@@ -95,6 +96,9 @@ export class KullaniciServisi implements OnModuleInit {
     }
 
     async bul(id: string): Promise<Kullanici> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Kullanıcı ID: ${id}`);
+        }
         try {
             // MongoDB'de _id ile arama yapmak için explicit olarak belirtiyoruz
             // TypeORM Mongo driver bazen id -> _id mapping'ini karıştırabiliyor
@@ -104,6 +108,8 @@ export class KullaniciServisi implements OnModuleInit {
             if (!kullanici) {
                 throw new NotFoundException('Kullanıcı bulunamadı');
             }
+            // Ensure ID is mapped
+            if (kullanici._id) kullanici.id = kullanici._id.toString();
             return kullanici;
         } catch (e) {
             console.error('KullaniciServisi.bul hatasi:', e);
@@ -126,7 +132,9 @@ export class KullaniciServisi implements OnModuleInit {
     }
 
     async guncelle(id: string, kullaniciGuncellemeDto: KullaniciGuncellemeDto): Promise<Kullanici> {
-
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Kullanıcı ID: ${id}`);
+        }
 
         const veri: any = { ...kullaniciGuncellemeDto };
         if (veri.sifre) {
@@ -138,6 +146,9 @@ export class KullaniciServisi implements OnModuleInit {
     }
 
     async sil(id: string): Promise<void> {
+        if (!ObjectId.isValid(id)) {
+            throw new NotFoundException(`Geçersiz Kullanıcı ID: ${id}`);
+        }
         const sonuc = await this.kullaniciDeposu.delete(new ObjectId(id));
         if (sonuc.affected === 0) {
             throw new NotFoundException('Kullanıcı bulunamadı');
