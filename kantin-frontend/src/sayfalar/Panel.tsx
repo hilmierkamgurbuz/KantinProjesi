@@ -45,8 +45,8 @@ const Panel: React.FC = () => {
             setKullanicilar(kullanicilarYanit.data
                 .map(u => ({ ...u, id: (u.id || u._id) as string })) // ID normalizasyonu
                 .filter(u => u.rol !== KullaniciRolu.YONETICI));
-            setKategoriler(kategorilerYanit.data);
-            setUrunler(urunlerYanit.data);
+            setKategoriler(kategorilerYanit.data.map(k => ({ ...k, id: (k.id || k._id) as string })));
+            setUrunler(urunlerYanit.data.map(u => ({ ...u, id: (u.id || u._id) as string })));
         } catch (hata) {
             console.error('Veri yükleme hatası:', hata);
         }

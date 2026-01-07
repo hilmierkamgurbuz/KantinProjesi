@@ -23,6 +23,7 @@ export interface Kullanici {
 }
 
 export interface Kategori {
+  _id?: string;
   id: string;
   ad: string;
   aciklama?: string;
@@ -32,6 +33,7 @@ export interface Kategori {
 }
 
 export interface Urun {
+  _id?: string;
   id: string;
   ad: string;
   kategoriId: string;

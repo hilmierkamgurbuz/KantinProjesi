@@ -12,6 +12,9 @@ export class Kategori {
     @ObjectIdColumn()
     id: ObjectId;
 
+    @ObjectIdColumn({ name: '_id', select: false })
+    _id: ObjectId;
+
     @Column({ unique: true })
     ad: string;
 

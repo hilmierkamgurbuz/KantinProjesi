@@ -18,18 +18,22 @@ export class UrunServisi {
         return this.urunDeposu.save(urun);
     }
 
-    tumunuGetir(): Promise<Urun[]> {
-        // İlişkileri manuel çözmek gerekebilir ama şimdilik sadece ürünleri dönelim
-        return this.urunDeposu.find();
+    async tumunuGetir(): Promise<Urun[]> {
+        const urunler = await this.urunDeposu.find();
+        return urunler.map(u => {
+            if (u._id) u.id = u._id;
+            return u;
+        });
     }
 
     async bul(id: string): Promise<Urun> {
         const urun = await this.urunDeposu.findOne({
-            where: { id: new ObjectId(id) as any },
+            where: { _id: new ObjectId(id) } as any,
         });
         if (!urun) {
             throw new NotFoundException('Ürün bulunamadı');
         }
+        if (urun._id) urun.id = urun._id;
         return urun;
     }
 

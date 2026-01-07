@@ -17,15 +17,20 @@ export class KategoriServisi {
         return this.kategoriDeposu.save(kategori);
     }
 
-    tumunuGetir(): Promise<Kategori[]> {
-        return this.kategoriDeposu.find();
+    async tumunuGetir(): Promise<Kategori[]> {
+        const kategoriler = await this.kategoriDeposu.find();
+        return kategoriler.map(k => {
+            if (k._id) k.id = k._id;
+            return k;
+        });
     }
 
     async bul(id: string): Promise<Kategori> {
-        const kategori = await this.kategoriDeposu.findOne({ where: { id: new ObjectId(id) as any } });
+        const kategori = await this.kategoriDeposu.findOne({ where: { _id: new ObjectId(id) } as any });
         if (!kategori) {
             throw new NotFoundException('Kategori bulunamadı');
         }
+        if (kategori._id) kategori.id = kategori._id;
         return kategori;
     }
 

@@ -12,6 +12,9 @@ export class Urun {
     @ObjectIdColumn()
     id: ObjectId;
 
+    @ObjectIdColumn({ name: '_id', select: false })
+    _id: ObjectId;
+
     @Column()
     ad: string;
 
