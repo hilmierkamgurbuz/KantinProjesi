@@ -10,6 +10,7 @@ export enum SiparisTuru {
 }
 
 export interface Kullanici {
+  _id?: string;
   id: string;
   ad: string;
   soyad: string;

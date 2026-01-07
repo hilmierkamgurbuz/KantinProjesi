@@ -16,7 +16,10 @@ export enum KullaniciRolu {
 @Entity('kullanicilar')
 export class Kullanici {
     @ObjectIdColumn()
-    id: ObjectId;
+    _id: ObjectId;
+
+    @Column()
+    id: string; // Sanal id alanı veya string olarak saklanan id
 
     @Column()
     ad: string;
