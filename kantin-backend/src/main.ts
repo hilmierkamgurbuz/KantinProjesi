@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { UygulamaModulu } from './uygulama.modulu';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function baslat() {
   const uygulama = await NestFactory.create(UygulamaModulu);
@@ -16,6 +17,9 @@ async function baslat() {
     whitelist: true,
     transform: true,
   }));
+
+  // Global exception filter to trace 404s
+  uygulama.useGlobalFilters(new AllExceptionsFilter());
 
   const port = process.env.PORT || 3000;
   await uygulama.listen(port);

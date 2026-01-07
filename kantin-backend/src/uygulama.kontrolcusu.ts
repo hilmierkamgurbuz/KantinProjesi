@@ -9,4 +9,9 @@ export class UygulamaKontrolcusu {
     merhabaDe(): string {
         return this.uygulamaServisi.merhabaDe();
     }
+
+    @Get('ping')
+    ping(): string {
+        return 'pong';
+    }
 }
