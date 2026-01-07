@@ -25,15 +25,16 @@ export class SiparisServisi {
             throw new NotFoundException(`Kullanıcı bulunamadı (ID: ${siparisOlusturmaDto.kullaniciId})`);
         }
 
-        // Bakiye Kontrolü (Veresiye için -10 limit)
+        // Bakiye Kontrolü (Veresiye için 10 TL limit - Borç Modeli)
         const toplamTutar = siparisOlusturmaDto.ogeler.reduce(
             (toplam, oge) => toplam + Number(oge.miktar) * Number(oge.birimFiyat),
             0,
         );
 
+        // Borç kontrolü: Mevcut Borç + Yeni Tutar > 10 ise Reddet
         if ((siparisOlusturmaDto.tur === SiparisTuru.VERESIYE || !siparisOlusturmaDto.tur) &&
-            (kullanici.bakiye - toplamTutar < -10)) {
-            throw new NotFoundException(`Yetersiz Bakiye. İşlem sonrası bakiye -10 TL'nin altına düşemez. Mevcut: ${kullanici.bakiye}, Tutar: ${toplamTutar}`);
+            (kullanici.bakiye + toplamTutar > 10)) {
+            throw new NotFoundException(`Yetersiz Bakiye. Maksimum borç limiti (10 TL) aşıldı. Mevcut Borç: ${kullanici.bakiye}, İşlem Tutarı: ${toplamTutar}`);
         }
 
         // Ürün kontrolü ve Hazırlık
@@ -70,7 +71,8 @@ export class SiparisServisi {
         const kaydedilenSiparis = await this.siparisDeposu.save(siparis);
 
         if (siparisOlusturmaDto.tur === SiparisTuru.VERESIYE || !siparisOlusturmaDto.tur) {
-            await this.kullaniciServisi.bakiyeGuncelle(siparisOlusturmaDto.kullaniciId, -toplamTutar);
+            // Borcu ARTIR (Pozitif bakiye = Borç)
+            await this.kullaniciServisi.bakiyeGuncelle(siparisOlusturmaDto.kullaniciId, toplamTutar);
         }
 
         return this.bul((kaydedilenSiparis as any)._id?.toString() || (kaydedilenSiparis as any).id);
